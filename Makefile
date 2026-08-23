@@ -3,7 +3,7 @@ CFLAGS = -Wall -Wextra -std=c11
 
 TARGET = droneCloud
 DEBUG_TARGET = droneCloud-debug
-SOURCES = src/main/main.c src/drone/drone.c
+SOURCES = $(shell find src -type f -name '*.c')
 
 all: $(TARGET)
 
