@@ -1,6 +1,9 @@
 #ifndef UDP_SOCKET_H
 #define UDP_SOCKET_H
 
+#include <sys/types.h>
+#include <sys/socket.h>
+
 
 /**
  * @brief Creates an IPv4 UDP socket.
@@ -40,4 +43,7 @@ int bindSocket(int socket, const char* address, unsigned short int port);
  */
 
 int receiveMsg(int socket, char *buffer, int buffer_size);
+
+
+int sendMsg(int socket, char* msg, int msg_size, struct sockaddr *to, socklen_t tolen);
 #endif

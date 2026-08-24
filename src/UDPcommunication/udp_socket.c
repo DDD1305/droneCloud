@@ -87,3 +87,15 @@ int receiveMsg(int socket, char *buffer, int buffer_size){
     }
 
 }
+
+int sendMsg(int socket, char* msg, int msg_size, struct sockaddr *to, socklen_t tolen){
+
+    int res = sendto(socket, msg, msg_size, 0,  to, tolen);
+
+    if(res ==-1){
+        perror(NULL);
+        return -1;
+    }
+    return res;
+
+}
