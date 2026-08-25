@@ -71,7 +71,6 @@ int bindSocket(int socket, const char* address, unsigned short int port){
 
 int receiveMsg(int socket, char *buffer, int buffer_size){
 
-    printf("En attente d'un message...\n");
     int res = recvfrom(socket, buffer, buffer_size-1, 0, NULL, NULL);
     if(res == -1){
         perror(NULL);
@@ -82,7 +81,7 @@ int receiveMsg(int socket, char *buffer, int buffer_size){
         buffer[res]='\0';
         return res;
     }else{
-        printf("The buffer size is too small ERROR");
+        printf("The buffer size is too small ERROR\n");
         return res;
     }
 

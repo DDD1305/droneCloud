@@ -1,4 +1,5 @@
 #include "drone.h"
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,4 +46,47 @@ char* show(const DroneState drone){
     free(text);
     return NULL;
 
+}
+
+int parseDroneState(char *buffer, DroneState *out_drone){
+    char *saveptr;
+    char *part = strtok_r(buffer, ";", &saveptr);
+    if(part == NULL || strcmp(part, "STATUS") != 0){
+        printf("The message don't start with STATUS\n");
+        return -1;
+    }
+
+    DroneState drone={0};
+
+    part = strtok_r(NULL, ";", &saveptr);
+    if(part == NULL){
+        printf("The message don't contain an id");
+        return -1;
+    }
+
+    long idL = strtol(part , NULL, 10);
+    if(idL >= INT_MIN && idL<= INT_MAX ){
+        drone.id = idL;
+    }else{
+        printf("the id isn't an int\n");
+        return -1;
+    }
+
+    part = strtok_r(NULL, ";", &saveptr);
+    if(part == NULL){
+        printf("The message don't contain a cord x");
+        return -1;
+    }
+
+    drone.x = strtod(part , NULL);
+
+    part = strtok_r(NULL, ";", &saveptr);
+    if(part == NULL){
+        printf("The message don't contain a cord y");
+        return -1;
+    }
+    drone.y = strtod(part, NULL);
+
+    *out_drone = drone;
+    return 0;
 }
