@@ -2,9 +2,9 @@
 #define DRONE_H
 
 typedef struct {
-  int id;   // identification
-  double x; // position x
-  double y; // position y
+    int id;   // identification
+    double x; // position x
+    double y; // position y
 } DroneState;
 
 DroneState newDrone(int id, double x, double y);

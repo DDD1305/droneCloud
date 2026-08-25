@@ -12,37 +12,37 @@
 
 int main(void) {
 
-  int socket = createSocket();
+    int socket = createSocket();
 
-  if (socket == -1) {
-    return 1;
-  }
-  printf("%d\n", socket);
+    if (socket == -1) {
+        return 1;
+    }
+    printf("%d\n", socket);
 
-  int res = bindSocket(socket, "127.0.0.2", 5002);
-  if (res != -1) {
-    printf("La valeur retour est : %d\n", res);
-  } else {
+    int res = bindSocket(socket, "127.0.0.2", 5002);
+    if (res != -1) {
+        printf("La valeur retour est : %d\n", res);
+    } else {
+        closeSocket(socket);
+        return 1;
+    }
+
+    struct sockaddr_in addr = {0};
+
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(5001);
+
+    inet_pton(AF_INET, "127.0.0.1", &addr.sin_addr);
+
+    DroneState drone = {
+        .id = 2,
+        .x = 10,
+        .y = 10,
+    };
+
+    char *msg = show(drone);
+    printf("%s\n", msg);
+    sendMsg(socket, msg, strlen(msg), (struct sockaddr *)&addr, sizeof addr);
     closeSocket(socket);
-    return 1;
-  }
-
-  struct sockaddr_in addr = {0};
-
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons(5001);
-
-  inet_pton(AF_INET, "127.0.0.1", &addr.sin_addr);
-
-  DroneState drone = {
-      .id = 2,
-      .x = 10,
-      .y = 10,
-  };
-
-  char *msg = show(drone);
-  printf("%s\n", msg);
-  sendMsg(socket, msg, strlen(msg), (struct sockaddr *)&addr, sizeof addr);
-  closeSocket(socket);
-  return 0;
+    return 0;
 }
