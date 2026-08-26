@@ -7,18 +7,6 @@
 
 #include "udp_socket.h"
 
-/*
-int status; //socket indentification
-
-void initCommunication(void){
-
-    struct addrinfo hints ={
-    .ai_family = AF_INET,
-    .ai_socktype = SOCK_DGRAM,
-    .ai_flags = AI_PASSIVE,
-    };
-}*/
-
 int createSocket(void) {
     int res = socket(AF_INET, SOCK_DGRAM, 0);
     /*0 it's because we use default protocol dgram->UDP
@@ -64,15 +52,19 @@ int bindSocket(int socket, const char *address, unsigned short int port) {
     return res;
 }
 
-int receiveMsg(int socket, char *buffer, int buffer_size) {
+ssize_t receiveMsg(int socket, char *buffer, size_t buffer_size) {
 
-    int res = recvfrom(socket, buffer, buffer_size - 1, 0, NULL, NULL);
+    if (buffer_size == 0) {
+        return -1;
+    }
+
+    ssize_t res = recvfrom(socket, buffer, buffer_size - 1, 0, NULL, NULL);
     if (res == -1) {
         perror(NULL);
         return -1;
     } else if (res == 0) {
         return 0;
-    } else if (res <= buffer_size - 1) {
+    } else if ((size_t)res <= buffer_size - 1) {
         buffer[res] = '\0';
         return res;
     } else {
@@ -81,13 +73,16 @@ int receiveMsg(int socket, char *buffer, int buffer_size) {
     }
 }
 
-int sendMsg(int socket, char *msg, int msg_size, struct sockaddr *to,
-            socklen_t tolen) {
+ssize_t sendMsg(int socket, const char *msg, size_t msg_size,
+                const struct sockaddr *to, socklen_t tolen) {
 
-    int res = sendto(socket, msg, msg_size, 0, to, tolen);
+    ssize_t res = sendto(socket, msg, msg_size, 0, to, tolen);
 
     if (res == -1) {
         perror(NULL);
+        return -1;
+    } else if ((size_t)res != msg_size) {
+        printf("Not all bytes were sent.\n");
         return -1;
     }
     return res;

@@ -1,4 +1,6 @@
 #include "drone.h"
+#include <assert.h>
+#include <errno.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,6 +51,9 @@ clean:
 }
 
 int parseDroneState(char *buffer, DroneState *out_drone) {
+
+    assert(out_drone != NULL);
+
     char *saveptr;
     char *part = strtok_r(buffer, ";", &saveptr);
     if (part == NULL || strcmp(part, "STATUS") != 0) {
@@ -64,9 +69,15 @@ int parseDroneState(char *buffer, DroneState *out_drone) {
         return -1;
     }
 
-    long idL = strtol(part, NULL, 10);
+    char *end;
+    errno = 0;
+
+    long idL = strtol(part, &end, 10);
+    if (errno != 0 || end == part || *end != '\0') {
+        return -1;
+    }
     if (idL >= INT_MIN && idL <= INT_MAX) {
-        drone.id = idL;
+        drone.id = (int)idL;
     } else {
         printf("the id isn't an int\n");
         return -1;
@@ -78,14 +89,27 @@ int parseDroneState(char *buffer, DroneState *out_drone) {
         return -1;
     }
 
-    drone.x = strtod(part, NULL);
+    errno = 0;
+    drone.x = strtod(part, &end);
+    if (errno != 0 || end == part || *end != '\0') {
+        return -1;
+    }
 
     part = strtok_r(NULL, ";", &saveptr);
     if (part == NULL) {
         printf("The message don't contain a cord y");
         return -1;
     }
-    drone.y = strtod(part, NULL);
+
+    errno = 0;
+    drone.y = strtod(part, &end);
+    if (errno != 0 || end == part || *end != '\0') {
+        return -1;
+    }
+
+    if (strtok_r(NULL, ";", &saveptr) != NULL) {
+        return -1;
+    }
 
     *out_drone = drone;
     return 0;

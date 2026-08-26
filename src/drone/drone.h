@@ -15,7 +15,11 @@ DroneState newDrone(int id, double x, double y);
 char *show(DroneState drone);
 
 /**
- *@return 0 if the msg was valid and -1 if not
+ * Parses a STATUS message.
+ *
+ * @param buffer Message buffer modified during parsing.
+ * @param out_drone Must point to a valid DroneState.
+ * @return 0 on success, -1 if the message is invalid.
  */
 int parseDroneState(char *buffer, DroneState *out_drone);
 

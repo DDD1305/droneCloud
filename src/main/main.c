@@ -1,49 +1,64 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netdb.h>
-#include <stdlib.h>
+#include <arpa/inet.h>
 #include <errno.h>
 #include <limits.h>
-#include <string.h>
-#include <arpa/inet.h>
+#include <netdb.h>
 #include <poll.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
 
-#include "../drone/drone.h"
 #include "../UDPcommunication/udp_socket.h"
+#include "../drone/drone.h"
 
+int main(int argc, char *argv[]) {
 
-int main(int argc, char * argv[]){
-
-    if(argc != 4){
+    if (argc != 4) {
         printf("Error: you need to use 3 arguments: id IP port\n");
         return 1;
     }
 
-    char * id = argv[1];
-    char* ip = argv[2];
-    char* portC = argv[3];
+    char *id = argv[1];
+    char *ip = argv[2];
+    char *portC = argv[3];
     unsigned short port;
 
     DroneState drone = newDrone(atoi(id), 0, 0);
 
+    // the relay
+    struct sockaddr_in relay = {0};
+
+    relay.sin_family = AF_INET;
+    relay.sin_port = htons(5001);
+
+    int conversion = inet_pton(AF_INET, "127.0.0.1", &relay.sin_addr);
+    if (conversion == 0) {
+        printf("L'adresse du relais n'est pas IPV4");
+        return EXIT_FAILURE;
+    } else if (conversion == -1) {
+        perror(NULL); // no prefix
+        return EXIT_FAILURE;
+    }
+
     int socket_fd = createSocket();
 
-    if(socket_fd ==-1){
+    if (socket_fd == -1) {
         perror(NULL);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     char *end;
-    errno=0;
+    errno = 0;
 
     unsigned long value = strtoul(portC, &end, 10);
 
     if (errno != 0) {
         printf("wrong format for the port\n");
         goto close;
-    } else if (end == portC|| *end != '\0') {
+    } else if (end == portC || *end != '\0') {
         printf("wrong format for the port\n");
         goto close;
     } else if (value > USHRT_MAX) {
@@ -55,7 +70,7 @@ int main(int argc, char * argv[]){
 
     int res = bindSocket(socket_fd, ip, port);
 
-    if(res ==-1){
+    if (res == -1) {
         goto close;
     }
 
@@ -65,40 +80,76 @@ int main(int argc, char * argv[]){
 
     char buffer[1024];
 
+    struct timespec last_send;
 
-    while(1){
+    if (clock_gettime(CLOCK_MONOTONIC, &last_send) == -1) {
+        perror("clock_gettime");
+        goto close;
+    }
+
+    while (1) {
         int poll_result = poll(pfds, 1, 20);
 
         if (poll_result == -1) {
-        perror("poll");
-        return 1;
+            perror("poll");
+            goto close;
         }
 
-        if(pfds[0].revents & POLLIN){
-            res = receiveMsg(socket_fd, buffer, sizeof(buffer));
-            if(res==-1){
+        // receive message
+        if (pfds[0].revents & POLLIN) {
+            ssize_t receive_result =
+                receiveMsg(socket_fd, buffer, sizeof(buffer));
+            if (receive_result == -1) {
                 goto close;
-            }else if(res ==0){
-                goto close;
-            }else{
-                DroneState out_drone={0};
+            } else if (receive_result == 0) {
+                // do nothing for now
+            } else {
+                DroneState out_drone = {0};
                 int parse_result = parseDroneState(buffer, &out_drone);
-                if(parse_result != -1){
+                if (parse_result != -1) {
                     char *p = show(out_drone);
+                    if (p == NULL) {
+                        goto close;
+                    }
                     printf("%s\n", p);
                     free(p);
                 }
-                
             }
+        }
+
+        // sends his status every 5 seconds
+
+        struct timespec now;
+        if (clock_gettime(CLOCK_MONOTONIC, &now) == -1) {
+            perror("clock_gettime");
+            goto close;
+        }
+
+        double elapsed =
+            (double)(now.tv_sec - last_send.tv_sec) +
+            (double)(now.tv_nsec - last_send.tv_nsec) / 1000000000.0;
+
+        if (elapsed >= 5) {
+
+            char *msg = show(drone);
+            if (msg != NULL) {
+                ssize_t send_result =
+                    sendMsg(socket_fd, msg, strlen(msg),
+                            (struct sockaddr *)&relay, sizeof(relay));
+                if (send_result == -1) {
+                    // do nothing for now
+                }
+                free(msg);
+            }
+            last_send = now;
         }
     }
 
-    //dead for now
+    // dead for now
     closeSocket(socket_fd);
-    return 0;
+    return EXIT_SUCCESS;
 
-    close :
+close:
     closeSocket(socket_fd);
-    return 1;
-
+    return EXIT_FAILURE;
 }

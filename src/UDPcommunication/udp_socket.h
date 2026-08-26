@@ -40,8 +40,8 @@ int bindSocket(int socket, const char *address, unsigned short int port);
  *@return -1 error 0 msg empty int>0 the number of bytes received
  */
 
-int receiveMsg(int socket, char *buffer, int buffer_size);
+ssize_t receiveMsg(int socket, char *buffer, size_t buffer_size);
 
-int sendMsg(int socket, char *msg, int msg_size, struct sockaddr *to,
-            socklen_t tolen);
+ssize_t sendMsg(int socket, const char *msg, size_t msg_size,
+                const struct sockaddr *to, socklen_t tolen);
 #endif
