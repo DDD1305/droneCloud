@@ -1,0 +1,28 @@
+If:
+  PathMatch: test/.*
+CompileFlags:
+  Add:
+    - -I../include
+    - -D_POSIX_C_SOURCE=200809L
+    - -std=c11
+
+---
+
+If:
+  PathMatch: src/.*
+CompileFlags:
+  Add:
+    - -I../../include
+    - -D_POSIX_C_SOURCE=200809L
+    - -std=c11
+
+---
+
+If:
+  PathMatch: include/.*
+CompileFlags:
+  Add:
+    - -xc
+    - -I..
+    - -D_POSIX_C_SOURCE=200809L
+    - -std=c11

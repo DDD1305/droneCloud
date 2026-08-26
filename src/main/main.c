@@ -11,8 +11,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "../UDPcommunication/udp_socket.h"
-#include "../drone/drone.h"
+#include "dronecloud/drone.h"
+#include "dronecloud/udp_socket.h"
 
 int main(int argc, char *argv[]) {
 

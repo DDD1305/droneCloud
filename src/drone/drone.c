@@ -1,4 +1,4 @@
-#include "drone.h"
+#include "dronecloud/drone.h"
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>
@@ -65,7 +65,7 @@ int parseDroneState(char *buffer, DroneState *out_drone) {
 
     part = strtok_r(NULL, ";", &saveptr);
     if (part == NULL) {
-        printf("The message don't contain an id");
+        printf("The message don't contain an id\n");
         return -1;
     }
 
@@ -85,7 +85,7 @@ int parseDroneState(char *buffer, DroneState *out_drone) {
 
     part = strtok_r(NULL, ";", &saveptr);
     if (part == NULL) {
-        printf("The message don't contain a cord x");
+        printf("The message don't contain a cord x\n");
         return -1;
     }
 
@@ -97,7 +97,7 @@ int parseDroneState(char *buffer, DroneState *out_drone) {
 
     part = strtok_r(NULL, ";", &saveptr);
     if (part == NULL) {
-        printf("The message don't contain a cord y");
+        printf("The message don't contain a cord y\n");
         return -1;
     }
 

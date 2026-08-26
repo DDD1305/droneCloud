@@ -6,9 +6,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "../src/drone/drone.h"
+#include "dronecloud/drone.h"
 
-#include "../src/UDPcommunication/udp_socket.h"
+#include "dronecloud/udp_socket.h"
 
 int main(void) {
 
