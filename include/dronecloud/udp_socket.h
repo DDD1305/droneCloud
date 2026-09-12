@@ -1,6 +1,7 @@
 #ifndef UDP_SOCKET_H
 #define UDP_SOCKET_H
 
+#include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 
@@ -40,7 +41,8 @@ int bindSocket(int socket, const char *address, unsigned short int port);
  *@return -1 error 0 msg empty int>0 the number of bytes received
  */
 
-ssize_t receiveMsg(int socket, char *buffer, size_t buffer_size);
+ssize_t receiveMsg(int socket, char *buffer, size_t buffer_size,
+                   struct sockaddr_in *source);
 
 ssize_t sendMsg(int socket, const char *msg, size_t msg_size,
                 const struct sockaddr *to, socklen_t tolen);

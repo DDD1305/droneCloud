@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
         // receive message
         if (pfds[0].revents & POLLIN) {
             ssize_t receive_result =
-                receiveMsg(socket_fd, buffer, sizeof(buffer));
+                receiveMsg(socket_fd, buffer, sizeof(buffer), NULL);
             if (receive_result == -1) {
                 goto close;
             } else if (receive_result == 0) {

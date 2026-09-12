@@ -1,5 +1,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -52,25 +53,31 @@ int bindSocket(int socket, const char *address, unsigned short int port) {
     return res;
 }
 
-ssize_t receiveMsg(int socket, char *buffer, size_t buffer_size) {
+ssize_t receiveMsg(int socket, char *buffer, size_t buffer_size,
+                   struct sockaddr_in *source) {
 
     if (buffer_size == 0) {
         return -1;
     }
+    struct sockaddr_in sender;
+    socklen_t sender_len = sizeof(sender);
 
-    ssize_t res = recvfrom(socket, buffer, buffer_size - 1, 0, NULL, NULL);
+    ssize_t res = recvfrom(socket, buffer, buffer_size, 0,
+                           (struct sockaddr *)&sender, &sender_len);
+
     if (res == -1) {
         perror(NULL);
         return -1;
-    } else if (res == 0) {
-        return 0;
     } else if ((size_t)res <= buffer_size - 1) {
         buffer[res] = '\0';
-        return res;
     } else {
         printf("The buffer size is too small ERROR\n");
-        return res;
+        return -1;
     }
+    if (source != NULL) {
+        *source = sender;
+    }
+    return res;
 }
 
 ssize_t sendMsg(int socket, const char *msg, size_t msg_size,
