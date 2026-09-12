@@ -76,7 +76,7 @@ int parseDroneState(char *buffer, DroneState *out_drone) {
     if (errno != 0 || end == part || *end != '\0') {
         return -1;
     }
-    if (idL >= INT_MIN && idL <= INT_MAX) {
+    if (idL >= INT_MIN && idL <= INT_MAX && idL != 0) {
         drone.id = (int)idL;
     } else {
         printf("the id isn't an int\n");
@@ -113,4 +113,35 @@ int parseDroneState(char *buffer, DroneState *out_drone) {
 
     *out_drone = drone;
     return 0;
+}
+
+int updateDataDrone(DroneState *dataDrone, int *nb_drone, DroneState *drone) {
+    int firstPositionClear = -1;
+    int foundFPC = 0;
+    int nbDroneFound = 0;
+    for (int i = 0; i < NB_FRIENDS; i++) {
+        if (foundFPC == 0 && dataDrone[i].id == 0) {
+            firstPositionClear = i;
+            foundFPC++;
+        }
+        if (nbDroneFound == *nb_drone) {
+            if (firstPositionClear == -1) {
+                dataDrone[i] = *drone;
+                (*nb_drone)++;
+                return 1;
+            } else {
+                dataDrone[firstPositionClear] = *drone;
+                (*nb_drone)++;
+                return 1;
+            }
+        }
+        if (dataDrone[i].id == drone->id) {
+            dataDrone[i].x = drone->x;
+            dataDrone[i].y = drone->y;
+            return 0;
+        } else if (dataDrone[i].id != 0) {
+            nbDroneFound++;
+        }
+    }
+    return -1;
 }

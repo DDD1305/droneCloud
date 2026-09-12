@@ -36,8 +36,8 @@ int main(void) {
 
     DroneState drone = {
         .id = 2,
-        .x = 10,
-        .y = 10,
+        .x = 100,
+        .y = 140,
     };
 
     char *msg = show(drone);

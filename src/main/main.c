@@ -32,9 +32,9 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in relay = {0};
 
     relay.sin_family = AF_INET;
-    relay.sin_port = htons(5001);
+    relay.sin_port = htons(5003);
 
-    int conversion = inet_pton(AF_INET, "127.0.0.1", &relay.sin_addr);
+    int conversion = inet_pton(AF_INET, "127.0.0.3", &relay.sin_addr);
     if (conversion == 0) {
         printf("L'adresse du relais n'est pas IPV4");
         return EXIT_FAILURE;
@@ -74,6 +74,9 @@ int main(int argc, char *argv[]) {
         goto close;
     }
 
+    DroneState dataDrone[NB_FRIENDS] = {0};
+    int nb_drone = 0;
+
     struct pollfd pfds[1];
     pfds[0].fd = socket_fd;
     pfds[0].events = POLLIN;
@@ -111,7 +114,21 @@ int main(int argc, char *argv[]) {
                     if (p == NULL) {
                         goto close;
                     }
-                    printf("%s\n", p);
+                    int updateDataDrone_result =
+                        updateDataDrone(dataDrone, &nb_drone, &out_drone);
+                    if (updateDataDrone_result == -1) {
+                    }
+                    for (int i = 0; i < NB_FRIENDS; i++) {
+                        if (dataDrone[i].id != 0) {
+                            char *texte = show(dataDrone[i]);
+                            if (texte != NULL) {
+                                printf("%s\n", texte);
+                                free(texte);
+                            }
+                        }
+                    }
+
+                    // printf("%s\n", p);
                     free(p);
                 }
             }
