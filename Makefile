@@ -23,6 +23,11 @@ $(DEBUG_TARGET): $(SOURCES)
 test: $(TEST_TARGETS)
 	@for test_program in $(TEST_TARGETS); do ./$$test_program; done
 
+relay: bin/udp_relay
+
+bin/udp_relay: test/udp_relay.c $(LIB_SOURCES) $(wildcard include/dronecloud/*.h) | bin
+	$(CC) $(CPPFLAGS) $(CFLAGS) test/udp_relay.c $(LIB_SOURCES) $(LDLIBS) -o $@
+
 bin/test_%: test/test_%.c $(LIB_SOURCES) | bin
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ $(LDLIBS) -o $@
 
@@ -36,6 +41,6 @@ valgrind: debug
 	valgrind --leak-check=full --show-leak-kinds=all ./$(DEBUG_TARGET)
 
 clean:
-	rm -f $(TARGET) $(DEBUG_TARGET) $(TEST_TARGETS)
+	rm -f $(TARGET) $(DEBUG_TARGET) $(TEST_TARGETS) bin/udp_relay
 
-.PHONY: all debug test gdb valgrind clean
+.PHONY: all debug test relay gdb valgrind clean

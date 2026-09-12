@@ -32,9 +32,9 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in relay = {0};
 
     relay.sin_family = AF_INET;
-    relay.sin_port = htons(5003);
+    relay.sin_port = htons(5001);
 
-    int conversion = inet_pton(AF_INET, "127.0.0.3", &relay.sin_addr);
+    int conversion = inet_pton(AF_INET, "127.0.0.1", &relay.sin_addr);
     if (conversion == 0) {
         printf("L'adresse du relais n'est pas IPV4");
         return EXIT_FAILURE;
